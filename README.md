@@ -1,22 +1,20 @@
-# code-studio
-
-# 🚀 Code Studio
+# Code Studio
 
 **Code Studio** is a modern web-based code editor built with React, TypeScript, and Vite. It features a sleek UI powered by Tailwind CSS and integrates with [Judge0](https://judge0.com/) for real-time code compilation and execution.
 
 ---
 
-## 🧩 Features
+## Features
 
-- ✍️ Real-time code editing with syntax highlighting
-- 🧠 Code execution using Judge0 API
-- ⚡ Fast build and development powered by Vite
-- 🎨 Styled with Tailwind CSS
-- 🧪 Type-safe code using TypeScript
+-  Real-time code editing with syntax highlighting
+-  Code execution using Judge0 API
+-  Fast build and development powered by Vite
+-  Styled with Tailwind CSS
+-  Type-safe code using TypeScript
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```bash
 .
