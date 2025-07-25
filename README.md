@@ -14,6 +14,17 @@
 
 ---
 
+## How to Run
+
+- Clone the repository.
+- Go to the directory and install all the dependencies.
+- ```bash
+  npm install
+- Get your Judge0 API from https://rapidapi.com/judge0-official/api/judge0-ce. Create .env file and paste it there (e.g., VITE_JUDGE0_API_KEY=your_api_key_here).
+- Start the development server.
+- ```bash
+  npm run dev
+
 ##  Project Structure
 
 ```bash
