@@ -1,13 +1,58 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Editor } from '@monaco-editor/react';
 
 interface CodeEditorProps {
   language: string;
   value: string;
   onChange: (value: string) => void;
+  fontSize?: number;
+  wordWrap?: boolean;
+  lineNumbers?: boolean;
+  codeSuggestions?: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ language, value, onChange }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ 
+  language, 
+  value, 
+  onChange, 
+  fontSize = 14, 
+  wordWrap = false, 
+  lineNumbers = true,
+  codeSuggestions = true
+}) => {
+  const editorRef = useRef<any>(null);
+  
+
+
+  // Update editor options when settings change
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = editorRef.current;
+      editor.updateOptions({
+        fontSize: fontSize,
+        lineNumbers: lineNumbers ? 'on' : 'off',
+        
+        wordWrap: wordWrap ? 'on' : 'off',
+        suggest: {
+          showKeywords: codeSuggestions,
+          showSnippets: codeSuggestions,
+          showFunctions: codeSuggestions,
+          showVariables: codeSuggestions,
+        },
+        quickSuggestions: {
+          other: codeSuggestions,
+          comments: codeSuggestions,
+          strings: true,
+        },
+        parameterHints: {
+          enabled: codeSuggestions,
+        },
+      });
+    }
+  }, [fontSize, wordWrap, lineNumbers, codeSuggestions]);
+
+
+
   const getMonacoLanguage = (lang: string): string => {
     const langMap: Record<string, string> = {
       javascript: 'javascript',
@@ -24,6 +69,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ language, value, onChange }) =>
     onChange(newValue || '');
   };
 
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+  };
+
   return (
     <div className="h-full">
       <Editor
@@ -31,17 +80,19 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ language, value, onChange }) =>
         language={getMonacoLanguage(language)}
         value={value}
         onChange={handleEditorChange}
+        onMount={handleEditorDidMount}
         theme="vs-dark"
         options={{
           minimap: { enabled: true },
-          fontSize: 14,
-          lineNumbers: 'on',
+          fontSize: fontSize,
+          lineNumbers: lineNumbers ? 'on' : 'off',
           roundedSelection: false,
           scrollBeyondLastLine: false,
           automaticLayout: true,
-          tabSize: 2,
+          tabSize: 4,
           insertSpaces: true,
-          wordWrap: 'on',
+          detectIndentation: false,
+          wordWrap: wordWrap ? 'on' : 'off',
           bracketPairColorization: { enabled: true },
           smoothScrolling: true,
           cursorBlinking: 'smooth',
@@ -52,18 +103,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ language, value, onChange }) =>
           contextmenu: true,
           copyWithSyntaxHighlighting: true,
           suggest: {
-            showKeywords: true,
-            showSnippets: true,
-            showFunctions: true,
-            showVariables: true,
+            showKeywords: codeSuggestions,
+            showSnippets: codeSuggestions,
+            showFunctions: codeSuggestions,
+            showVariables: codeSuggestions,
           },
           quickSuggestions: {
-            other: true,
-            comments: true,
+            other: codeSuggestions,
+            comments: codeSuggestions,
             strings: true,
           },
           parameterHints: {
-            enabled: true,
+            enabled: codeSuggestions,
           },
           folding: true,
           foldingStrategy: 'indentation',

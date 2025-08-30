@@ -25,6 +25,12 @@ const EditorPage: React.FC = () => {
   const [output, setOutput] = useState<string>('');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [showApiKeyModal, setShowApiKeyModal] = useState<boolean>(false);
+  const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [fontSize, setFontSize] = useState<number>(14);
+
+  const [wordWrap, setWordWrap] = useState<boolean>(false);
+  const [lineNumbers, setLineNumbers] = useState<boolean>(true);
+  const [codeSuggestions, setCodeSuggestions] = useState<boolean>(true);
   const languageNames: Record<string, string> = {
     javascript: 'JavaScript',
     python: 'Python',
@@ -171,9 +177,13 @@ const EditorPage: React.FC = () => {
             <Key className="h-4 w-4" />
           </button>
           
-          <button className="p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors text-gray-300 hover:text-white">
-            <Settings className="h-4 w-4" />
-          </button>
+                     <button 
+             onClick={() => setShowSettingsModal(true)}
+             className="p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors text-gray-300 hover:text-white"
+             title="Settings"
+           >
+             <Settings className="h-4 w-4" />
+           </button>
           <button
             onClick={() => setShowNewFileModal(true)}
             className="flex items-center space-x-1 px-2 py-1.5 rounded-md bg-blue-700 hover:bg-blue-800 transition-colors text-white ml-2"
@@ -219,9 +229,78 @@ const EditorPage: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+             )}
 
-      {/* New File Modal */}
+       {/* Settings Modal */}
+       {showSettingsModal && (
+         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+             <div className="flex items-center space-x-2 mb-4">
+               <Settings className="h-5 w-5 text-blue-400" />
+               <h3 className="text-lg font-semibold text-white">Settings</h3>
+             </div>
+             
+             <div className="space-y-4 text-sm text-gray-300">
+               {/* Font Size */}
+               <div>
+                 <label className="block text-sm font-medium mb-2">Font Size: {fontSize}px</label>
+                 <input
+                   type="range"
+                   min="10"
+                   max="24"
+                   value={fontSize}
+                   onChange={(e) => setFontSize(Number(e.target.value))}
+                   className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                 />
+               </div>
+
+               
+
+               {/* Word Wrap */}
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-medium">Word Wrap</label>
+                 <input
+                   type="checkbox"
+                   checked={wordWrap}
+                   onChange={(e) => setWordWrap(e.target.checked)}
+                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                 />
+               </div>
+
+               {/* Line Numbers */}
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-medium">Line Numbers</label>
+                 <input
+                   type="checkbox"
+                   checked={lineNumbers}
+                   onChange={(e) => setLineNumbers(e.target.checked)}
+                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                 />
+               </div>
+
+               {/* Code Suggestions */}
+               <div className="flex items-center justify-between">
+                 <label className="text-sm font-medium">Code Suggestions</label>
+                 <input
+                   type="checkbox"
+                   checked={codeSuggestions}
+                   onChange={(e) => setCodeSuggestions(e.target.checked)}
+                   className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                 />
+               </div>
+             </div>
+             
+             <button
+               onClick={() => setShowSettingsModal(false)}
+               className="mt-6 w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+             >
+               Close
+             </button>
+           </div>
+         </div>
+       )}
+
+       {/* New File Modal */}
       {showNewFileModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-6 max-w-xs w-full mx-4">
@@ -282,41 +361,49 @@ const EditorPage: React.FC = () => {
         <div className="flex-1 flex flex-col">
           <PanelGroup direction="vertical">
             {/* Code Editor */}
-            <Panel defaultSize={70} minSize={30}>
-              <div className="h-full bg-gray-900">
-                <div className="h-8 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-4 w-4 text-blue-400" />
-                    <span className="text-sm text-gray-300">{currentFile}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">{language?.toUpperCase()}</div>
-                </div>
-                <CodeEditor
-                  language={language || 'javascript'}
-                  value={code}
-                  onChange={setCode}
-                />
-              </div>
-            </Panel>
+                         <Panel defaultSize={70} minSize={30}>
+               <div className="h-full bg-gray-900 flex flex-col">
+                 <div className="h-8 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 flex-shrink-0">
+                   <div className="flex items-center space-x-2">
+                     <FileText className="h-4 w-4 text-blue-400" />
+                     <span className="text-sm text-gray-300">{currentFile}</span>
+                   </div>
+                   <div className="text-xs text-gray-500">{language?.toUpperCase()}</div>
+                 </div>
+                 <div className="flex-1 overflow-hidden">
+                                                            <CodeEditor
+                       language={language || 'javascript'}
+                       value={code}
+                       onChange={setCode}
+                       fontSize={fontSize}
+                       wordWrap={wordWrap}
+                       lineNumbers={lineNumbers}
+                       codeSuggestions={codeSuggestions}
+                     />
+                 </div>
+               </div>
+             </Panel>
             <PanelResizeHandle className="h-1 bg-gray-700 hover:bg-gray-600 transition-colors" />
             {/* Output Terminal */}
-            <Panel defaultSize={30} minSize={20}>
-              <div className="h-full bg-gray-900">
-                <div className="h-8 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
-                  <div className="flex items-center space-x-2">
-                    <Terminal className="h-4 w-4 text-green-400" />
-                    <span className="text-sm text-gray-300">Output</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {isRunning && (
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    )}
-                    <span className="text-xs text-gray-500">{isRunning ? 'Running' : 'Ready'}</span>
-                  </div>
-                </div>
-                <CompilerOutput output={output} isRunning={isRunning} />
-              </div>
-            </Panel>
+                         <Panel defaultSize={30} minSize={20}>
+               <div className="h-full bg-gray-900 flex flex-col">
+                 <div className="h-8 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 flex-shrink-0">
+                   <div className="flex items-center space-x-2">
+                     <Terminal className="h-4 w-4 text-green-400" />
+                     <span className="text-sm text-gray-300">Output</span>
+                   </div>
+                   <div className="flex items-center space-x-2">
+                     {isRunning && (
+                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                     )}
+                     <span className="text-xs text-gray-500">{isRunning ? 'Running' : 'Ready'}</span>
+                   </div>
+                 </div>
+                 <div className="flex-1 overflow-hidden">
+                   <CompilerOutput output={output} isRunning={isRunning} />
+                 </div>
+               </div>
+             </Panel>
           </PanelGroup>
         </div>
       </div>
