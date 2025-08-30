@@ -142,10 +142,26 @@ const EditorPage: React.FC = () => {
             <span className="text-sm">{isRunning ? 'Running...' : 'Run Code'}</span>
           </button>
           
-          <button className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors text-gray-300 hover:text-white">
-            <Save className="h-4 w-4" />
-            <span className="text-sm">Save</span>
-          </button>
+                     <button 
+             onClick={() => {
+               const currentFileData = files.find(f => f.name === currentFile);
+               if (currentFileData) {
+                 const blob = new Blob([currentFileData.code], { type: 'text/plain' });
+                 const url = URL.createObjectURL(blob);
+                 const a = document.createElement('a');
+                 a.href = url;
+                 a.download = currentFileData.name;
+                 document.body.appendChild(a);
+                 a.click();
+                 document.body.removeChild(a);
+                 URL.revokeObjectURL(url);
+               }
+             }}
+             className="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors text-gray-300 hover:text-white"
+           >
+             <Save className="h-4 w-4" />
+             <span className="text-sm">Save</span>
+           </button>
           
           <button 
             onClick={() => setShowApiKeyModal(true)}
