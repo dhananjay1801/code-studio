@@ -31,6 +31,11 @@ const EditorPage: React.FC = () => {
   const [wordWrap, setWordWrap] = useState<boolean>(false);
   const [lineNumbers, setLineNumbers] = useState<boolean>(true);
   const [codeSuggestions, setCodeSuggestions] = useState<boolean>(true);
+  
+  // Input handling state
+  const [waitingForInput, setWaitingForInput] = useState<boolean>(false);
+  const [inputHistory, setInputHistory] = useState<string[]>([]);
+  const [currentExecution, setCurrentExecution] = useState<string>('');
   const languageNames: Record<string, string> = {
     javascript: 'JavaScript',
     python: 'Python',
@@ -42,13 +47,13 @@ const EditorPage: React.FC = () => {
 
   // Default code is now just a comment
   const defaultCode: Record<string, string> = {
-    javascript: '// Welcome to JavaScript editor',
-    python: '# Welcome to Python editor',
-    java: '// Welcome to Java editor',
-    cpp: '// Welcome to C++ editor',
-    c: '// Welcome to C editor',
-    kotlin: '// Welcome to Kotlin editor',
-    default: '// Welcome to editor',
+    javascript: '// Welcome to JavaScript editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    python: '# Welcome to Python editor\n# Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n# Click "Run Code". The program will prompt you to enter the required inputs.\n# Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n# Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    java: '// Welcome to Java editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    cpp: '// Welcome to C++ editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    c: '// Welcome to C editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    kotlin: '// Welcome to Kotlin editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
+    default: '// Welcome to editor\n// Note: This compiler doesn\'t support interactive inputs. Use stdin for input.\n// Click "Run Code". The program will prompt you to enter the required inputs.\n// Provide the necessary inputs one by one in the input field. After typing each input, press Enter or Send.\n// Once you\'ve entered all the inputs, click "Run Code" again to execute the program with the data you\'ve provided.',
   };
 
   // File state: { name: string, code: string }
@@ -81,12 +86,32 @@ const EditorPage: React.FC = () => {
       return;
     }
 
+    const currentCode = files.find(f => f.name === currentFile)?.code || '';
+    
+    // Check if code requires input
+    const needsInput = judge0Service.requiresInput(currentCode, language!);
+    
+    if (needsInput && inputHistory.length === 0) {
+      // First run - detect input requirement
+      setWaitingForInput(true);
+      setOutput('Your code requires input. Please provide the inputs below, press send after each input:');
+      setIsRunning(false);
+      return;
+    }
+
     setIsRunning(true);
-    setOutput('🔄 Compiling and executing code...\n');
+    setOutput('Compiling and executing code...\n');
 
     try {
-      const result = await judge0Service.submitCode(language!, files.find(f => f.name === currentFile)?.code || '');
+      // Combine all inputs with newlines
+      const stdin = inputHistory.join('\n');
+      const result = await judge0Service.submitCode(language!, currentCode, stdin);
       setOutput(result);
+      
+      // Reset input state after successful execution
+      setWaitingForInput(false);
+      setInputHistory([]);
+      setCurrentExecution('');
     } catch (error) {
       console.error('Compilation error:', error);
       
@@ -97,7 +122,7 @@ const EditorPage: React.FC = () => {
         // Fall back to simulation after a delay
         setTimeout(async () => {
           try {
-            const simulatedResult = await judge0Service.simulateExecution(language!, files.find(f => f.name === currentFile)?.code || '');
+            const simulatedResult = await judge0Service.simulateExecution(language!, currentCode);
             setOutput(simulatedResult + '\n\n⚠️  This is simulated output. Configure Judge0 API for real compilation.');
           } catch (simError) {
             setOutput('❌ Failed to execute code');
@@ -108,6 +133,13 @@ const EditorPage: React.FC = () => {
       }
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handleInputSubmit = (input: string) => {
+    if (input.trim()) {
+      setInputHistory(prev => [...prev, input.trim()]);
+      setOutput(prev => prev + `\nInput sent: ${input.trim()}`);
     }
   };
 
@@ -400,7 +432,12 @@ const EditorPage: React.FC = () => {
                    </div>
                  </div>
                  <div className="flex-1 overflow-hidden">
-                   <CompilerOutput output={output} isRunning={isRunning} />
+                   <CompilerOutput 
+                     output={output} 
+                     isRunning={isRunning} 
+                     waitingForInput={waitingForInput}
+                     onInputSubmit={handleInputSubmit}
+                   />
                  </div>
                </div>
              </Panel>

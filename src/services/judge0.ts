@@ -46,6 +46,21 @@ class Judge0Service {
     };
   }
 
+  // Check if code requires input
+  requiresInput(sourceCode: string, language: string): boolean {
+    const inputPatterns = {
+      javascript: /prompt\(|readline|process\.stdin/,
+      python: /input\(/,
+      java: /Scanner|BufferedReader|System\.in/,
+      cpp: /cin\s*>>|scanf\(/,
+      c: /scanf\(|gets\(|fgets\(/,
+      kotlin: /readLine\(|Scanner/
+    };
+
+    const pattern = inputPatterns[language as keyof typeof inputPatterns];
+    return pattern ? pattern.test(sourceCode) : false;
+  }
+
   async submitCode(language: string, sourceCode: string, input?: string): Promise<string> {
     const languageId = LANGUAGE_IDS[language as keyof typeof LANGUAGE_IDS];
     
@@ -86,7 +101,7 @@ class Judge0Service {
     if (result.compile_output) {
       const compileOutput = atob(result.compile_output);
       if (compileOutput.trim()) {
-        output += `📋 Compilation Output:\n${compileOutput}\n\n`;
+        output += `Compilation Output:\n${compileOutput}\n\n`;
       }
     }
 
