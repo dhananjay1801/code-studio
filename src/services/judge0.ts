@@ -98,7 +98,7 @@ class Judge0Service {
     if (result.stdout) {
       const stdout = atob(result.stdout);
       if (stdout.trim()) {
-        output += `\n📤 Output:\n${stdout}\n`;
+        output += `\n▶️ Output:\n${stdout}\n`;
       }
     }
 
