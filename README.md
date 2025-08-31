@@ -2,7 +2,7 @@
 
 **Code Studio** is a modern web-based code editor built with React, TypeScript, and Vite. It features a sleek UI powered by Tailwind CSS and integrates with [Judge0](https://judge0.com/) for real-time code compilation and execution.
 
-Live link: d2n0spdabi1reg.cloudfront.net
+**Live link:** [d2n0spdabi1reg.cloudfront.net](https://d2n0spdabi1reg.cloudfront.net)
 
 ---
 
